@@ -3,6 +3,13 @@ if (typeof AOS !== "undefined") {
   AOS.init();
 }
 
+const video = document.querySelector("video");
+
+video.muted = true;
+video.play().catch(() => {
+  console.log("Autoplay bloqueado");
+});
+
 // Rolar até o fim da pagina
 function scrollbot() {
   const bottom = document.getElementById('Bottom');
@@ -107,15 +114,14 @@ const closeBtn = document.querySelector('.popup-sucesso .close');
 
 if (form && popup && closeBtn) {
 
-  form.addEventListener('submit', function(event) {
+  form.addEventListener('submit', function() {
 
-    event.preventDefault();
-
+  setTimeout(() => {
     popup.style.display = 'flex';
-
     form.reset();
+  }, 500);
 
-  });
+});
 
   closeBtn.addEventListener('click', () => {
     popup.style.display = 'none';
