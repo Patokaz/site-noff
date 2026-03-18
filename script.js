@@ -10,6 +10,15 @@ video.play().catch(() => {
   console.log("Autoplay bloqueado");
 });
 
+
+const toggle = document.getElementById("menu-toggle");
+const menu = document.querySelector(".header-buttons");
+
+toggle.addEventListener("click", () => {
+  menu.classList.toggle("active");
+});
+
+
 // Rolar até o fim da pagina
 function scrollbot() {
   const bottom = document.getElementById('Bottom');
@@ -32,6 +41,62 @@ if (btn) {
     }
   });
 }
+
+// container apresentacao
+
+  function ativarAccordionMobile() {
+    const isMobile = window.innerWidth <= 840;
+    const cards = document.querySelectorAll(".card-apresentacao");
+
+    cards.forEach(card => {
+      const content = card.querySelector(".conteudo");
+
+      // remove eventos antigos clonando o elemento
+      const newCard = card.cloneNode(true);
+      card.parentNode.replaceChild(newCard, card);
+    });
+
+    const newCards = document.querySelectorAll(".card-apresentacao");
+
+    newCards.forEach(card => {
+      const content = card.querySelector(".conteudo");
+
+      if (isMobile) {
+
+        content.style.maxHeight = null;
+
+        card.addEventListener("click", () => {
+
+          newCards.forEach(c => {
+            const cContent = c.querySelector(".conteudo");
+
+            if (c !== card) {
+              c.classList.remove("active");
+              cContent.style.maxHeight = null;
+            }
+          });
+
+          card.classList.toggle("active");
+
+          if (card.classList.contains("active")) {
+            content.style.maxHeight = content.scrollHeight + "px";
+          } else {
+            content.style.maxHeight = null;
+          }
+
+        });
+
+      } else {
+        content.style.maxHeight = null;
+        card.classList.remove("active");
+      }
+    });
+  }
+
+  ativarAccordionMobile();
+  window.addEventListener("resize", ativarAccordionMobile);
+
+// fim apresentação
 
 // feedback container
 document.addEventListener("DOMContentLoaded", () => {
@@ -108,29 +173,47 @@ if (telefone) {
 }
 
 // Popup formulário
-const form = document.getElementById('contato-form');
-const popup = document.getElementById('popup-sucesso');
-const closeBtn = document.querySelector('.popup-sucesso .close');
 
-if (form && popup && closeBtn) {
+  const form = document.getElementById("contato-form");
+  const popup = document.getElementById("popup-sucesso");
+  const closeBtn = document.querySelector(".popup-sucesso .close");
 
-  form.addEventListener('submit', function() {
+  if (form && popup && closeBtn) {
 
-  setTimeout(() => {
-    popup.style.display = 'flex';
-    form.reset();
-  }, 500);
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault(); // 🔥 ESSENCIAL
 
-});
+      const formData = new FormData(form);
 
-  closeBtn.addEventListener('click', () => {
-    popup.style.display = 'none';
-  });
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
 
-  window.addEventListener('click', (e) => {
-    if (e.target === popup) {
-      popup.style.display = 'none';
-    }
-  });
+        if (response.ok) {
+          form.reset();
+          popup.style.display = "flex";
+        } else {
+          alert("Erro ao enviar.");
+        }
 
-}
+      } catch (error) {
+        alert("Erro de conexão.");
+      }
+    });
+
+    closeBtn.addEventListener("click", () => {
+      popup.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === popup) {
+        popup.style.display = "none";
+      }
+    });
+
+  }
