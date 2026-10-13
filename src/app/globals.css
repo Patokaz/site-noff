@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Identidade NOFF: mudar uma cor aqui muda o site inteiro.
+   Uso nas classes: bg-noff-roxo, text-noff-creme, etc.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-noff-preto: #141414;
+  --color-noff-roxo: #9125d9;
+  --color-noff-roxo-escuro: #7d21bb;
+  --color-noff-roxo-claro: #b565f0;
+  --color-noff-creme: #fefce8;
+  --color-noff-branco: #fafafa;
+  --color-noff-faixa: #111111;
+  --color-whatsapp: #29a71a;
+
+  /* Mesmos cortes da v1: max-tablet = até 1060px, max-celular = até 840px */
+  --breakpoint-celular: 52.5625rem;
+  --breakpoint-tablet: 66.3125rem;
+
+  /* Curva de movimento do site (classe ease-suave); a mesma do Motion em src/lib/animacao.ts */
+  --ease-suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fontes carregadas em layout.tsx (next/font, sem pedir nada ao Google na visita) */
+@theme inline {
+  --font-sans: var(--font-poppins), sans-serif;
+  --font-display: var(--font-boldonse), system-ui;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-noff-preto);
+    color: var(--color-noff-creme);
+    line-height: normal;
+    overflow-x: hidden;
+    /* Reserva o espaço da barra de rolagem: travar a rolagem na abertura não mexe no layout */
+    scrollbar-gutter: stable;
+    /* Altura do menu fixo já encolhido: os links do menu param logo abaixo dele (o Lenis também lê isto) */
+    scroll-padding-top: clamp(56px, 4vw, 72px);
+
+    @media (width < 66.3125rem) {
+      scroll-padding-top: 80px;
+    }
+  }
+
+  body {
+    overflow-x: hidden;
+    /* clip corta o que vaza para os lados sem virar área de rolagem própria (com hidden, o
+       position: sticky do rodapé revelado não funcionaria). Navegador antigo fica no hidden. */
+    overflow-x: clip;
+  }
+
+  /* Seções que recebem foco ao usar os links do menu: sem contorno (não são clicáveis) */
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
+}
+
+/*
+  Títulos com sublinhado em degradê. A espessura vem de --sublinhado-espessura.
+  O traço se desenha quando o título aparece na tela (data-visivel, do <Reveal>).
+*/
+@utility sublinhado {
+  position: relative;
+  padding-bottom: var(--sublinhado-espessura, 0.5rem);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: var(--sublinhado-espessura, 0.5rem);
+    background: linear-gradient(to right, var(--color-noff-branco) var(--sublinhado-ate, 75%), transparent);
+    transform-origin: left;
+    transition: transform 1s var(--ease-suave) 0.3s;
+  }
+
+  &:not([data-visivel])::after {
+    transform: scaleX(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+}
+
+@utility sublinhado-centro {
+  position: relative;
+  padding-bottom: var(--sublinhado-espessura, 0.5rem);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: var(--sublinhado-espessura, 0.5rem);
+    background: linear-gradient(to right, transparent, var(--color-noff-branco), transparent);
+    transform-origin: center;
+    transition: transform 1s var(--ease-suave) 0.3s;
+  }
+
+  &:not([data-visivel])::after {
+    transform: scaleX(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
+}
+
+@layer components {
+  /*
+    Abertura (Abertura.tsx; estados em src/lib/abertura.ts): só aparece com <html data-abertura>.
+    Traço do N 0,2s→1,6s; preenchimento 1,4s→2s; se a página ainda estiver carregando, o brilho
+    "respira" até ela ficar pronta. Em "saindo", a tela some em 0,6s.
+  */
+  .abertura {
+    display: none;
+  }
+
+  html[data-abertura] {
+    overflow: hidden;
+  }
+
+  [data-abertura] .abertura {
+    display: flex;
+  }
+
+  /* Aba aberta em segundo plano: o desenho espera a pessoa chegar */
+  [data-abertura-espera] .abertura * {
+    animation-play-state: paused;
+  }
+
+  [data-abertura="saindo"] .abertura {
+    animation: abertura-sai 0.6s var(--ease-suave) forwards;
+  }
+
+  [data-abertura="saindo"] .abertura-simbolo {
+    animation: abertura-afasta 0.6s var(--ease-suave) forwards;
+  }
+
+  /*
+    Símbolo N que se desenha (SimboloN.tsx): na abertura e na página de erro (.simbolo-tracado).
+    Contorno 0,2s→1,6s; preenchimento e brilho 1,4s→2s.
+  */
+  [data-abertura] .simbolo-traco,
+  .simbolo-tracado .simbolo-traco {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+    animation:
+      simbolo-traca 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards,
+      simbolo-preenche 0.6s ease-out 1.4s forwards;
+  }
+
+  .simbolo-tracado .simbolo-brilho {
+    opacity: 0;
+    animation: simbolo-preenche 0.6s ease-out 1.4s forwards;
+  }
+
+  /* Na abertura, se a página ainda estiver carregando, o brilho "respira" */
+  [data-abertura] .simbolo-brilho {
+    opacity: 0;
+    animation:
+      simbolo-preenche 0.6s ease-out 1.4s forwards,
+      abertura-respira 1.2s ease-in-out 2s infinite alternate;
+  }
+
+  /* Na página de erro, quem pede "reduzir movimento" vê o símbolo pronto */
+  @media (prefers-reduced-motion: reduce) {
+    .simbolo-tracado .simbolo-traco,
+    .simbolo-tracado .simbolo-brilho {
+      animation: none;
+      stroke-dashoffset: 0;
+      fill-opacity: 1;
+      opacity: 1;
+    }
+  }
+
+  @keyframes simbolo-traca {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes simbolo-preenche {
+    to {
+      fill-opacity: 1;
+      opacity: 1;
+    }
+  }
+
+  @keyframes abertura-respira {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes abertura-sai {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  @keyframes abertura-afasta {
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  /* Rodapé revelado (Rodape.tsx): a página termina em cantos arredondados e sobe revelando o rodapé */
+  main:has(~ footer[data-revelado]) {
+    border-radius: 0 0 2.5rem 2.5rem;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  /* Barrinha de progresso da troca automática de depoimentos (Feedbacks.tsx) */
+  @keyframes progresso {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# Netlify: mantém a v2 de teste fora dos buscadores (o <meta name="robots"> faz o mesmo no HTML).
+# Não bloquear no robots.txt: o Google precisa conseguir ler este noindex.
+/*
+  X-Robots-Tag: noindex, nofollow
