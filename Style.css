@@ -520,7 +520,7 @@ footer {
 .icon{
   width: 10rem;
   height: 10rem;
-  background-image: url("IMG/Noff v2 SF.png");
+  background-image: url("IMG/n-noff-branco.png");
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -799,7 +799,7 @@ gap: 1rem;
 .icon{
   width: 14rem;
   height: 7rem;
-  background: url(IMG/Noff\ Completo\ v1\ SF_1\ BRANCO.png);
+  background: url(IMG/noff-completo-branco.png);
   background-size: contain;
   background-repeat: no-repeat;
 }
